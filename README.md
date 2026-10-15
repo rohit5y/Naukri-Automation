@@ -33,9 +33,9 @@ mvn clean test
 
 ## Run from Jenkins
 
-The root-level [`Jenkinsfile`](<Jenkinsfile>) runs the Maven test suite on a Jenkins agent. Add a Jenkins **Username with password** credential with ID `naukri-login`; use your Naukri login email as the username and store the password as the credential password. The pipeline exposes them only as masked `NAUKRI_EMAIL` and `NAUKRI_PASSWORD` environment variables. When starting a build, set the `RESUME_FILE_PATH` string parameter to the absolute path of a resume file available on the selected agent.
+The root-level [`Jenkinsfile`](<Jenkinsfile>) runs the Maven test suite on a Jenkins agent. Add a Jenkins **Username with password** credential with ID `naukri-login`; use your Naukri login email as the username and store the password as the credential password. Also add a Jenkins **Secret file** credential with ID `naukri-resume` and upload your resume. The pipeline binds these credentials as `NAUKRI_EMAIL`, `NAUKRI_PASSWORD`, and `RESUME_FILE_PATH`; Jenkins provides the temporary path for the secret file, so no resume path build parameter is needed.
 
-The agent must have JDK 17 or later, Maven, and Google Chrome installed and available to the Jenkins process. The pipeline runs Chrome in headless mode. Do not add credentials to the Jenkinsfile or commit `local.properties`.
+The agent must have JDK 17 or later, Maven, and Google Chrome installed and available to the Jenkins process. The pipeline runs Chrome in headless mode. Do not add credentials to the Jenkinsfile or commit `local.properties`; the ignored local file should not be present in the Jenkins checkout, so it cannot override the Jenkins-bound values.
 
 ## Test execution and reporting
 

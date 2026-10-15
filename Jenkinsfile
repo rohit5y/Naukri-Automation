@@ -11,7 +11,7 @@ pipeline {
                         passwordVariable: 'NAUKRI_PASSWORD'
                     ),
                     file(
-                        credentialsId: 'naukri-resume',
+                        credentialsId: "Rohit's Resume",
                         variable: 'RESUME_FILE_PATH'
                     )
                 ]) {

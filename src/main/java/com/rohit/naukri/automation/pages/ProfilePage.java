@@ -18,6 +18,8 @@ public class ProfilePage {
     private static final Duration PAGE_TIMEOUT = Duration.ofSeconds(30);
     private static final Duration UPLOAD_TIMEOUT = Duration.ofSeconds(60);
     private static final By FILE_INPUTS = By.cssSelector("input[type='file']");
+    private static final By UPDATE_RESUME_BUTTON = By.xpath(
+            "//button[normalize-space()='Update resume' or normalize-space()='Update Resume']");
     private static final By RESUME_UPLOAD_SUCCESS = By.xpath(
             "//*[contains(translate(normalize-space(.),"
                     + " 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'),"
@@ -53,6 +55,8 @@ public class ProfilePage {
         WebElement fileInput = selectResumeInput(fileInputs);
         fileInput.sendKeys(resumePath.toString());
         stepReporter.accept(driver, "Resume file selected for upload");
+        wait.until(ExpectedConditions.elementToBeClickable(UPDATE_RESUME_BUTTON)).click();
+        stepReporter.accept(driver, "Resume upload submitted");
         waitForUploadConfirmation();
         stepReporter.accept(driver, "Success message: Resume has been uploaded successfully");
     }

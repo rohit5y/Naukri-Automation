@@ -1,0 +1,12 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="Naukri Resume Automation">
+    <listeners>
+        <listener class-name="com.rohit.naukri.automation.reporting.ExtentReportListener"/>
+    </listeners>
+    <test name="Naukri Resume Tests">
+        <classes>
+            <class name="com.rohit.naukri.automation.NaukriResumeTest"/>
+            <class name="com.rohit.naukri.automation.config.AutomationConfigTest"/>
+        </classes>
+    </test>
+</suite>

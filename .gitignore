@@ -1,0 +1,8 @@
+target/
+/reports/
+.idea/
+.vscode/
+*.iml
+.env
+local.properties
+*.log

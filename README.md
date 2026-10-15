@@ -31,6 +31,12 @@ $env:RESUME_FILE_PATH = "C:\path\to\your-resume.pdf"
 mvn clean test
 ```
 
+## Run from Jenkins
+
+The root-level [`Jenkinsfile`](<Jenkinsfile>) runs the Maven test suite on a Jenkins agent. Add a Jenkins **Username with password** credential with ID `naukri-login`; use your Naukri login email as the username and store the password as the credential password. The pipeline exposes them only as masked `NAUKRI_EMAIL` and `NAUKRI_PASSWORD` environment variables. When starting a build, set the `RESUME_FILE_PATH` string parameter to the absolute path of a resume file available on the selected agent.
+
+The agent must have JDK 17 or later, Maven, and Google Chrome installed and available to the Jenkins process. The pipeline runs Chrome in headless mode. Do not add credentials to the Jenkinsfile or commit `local.properties`.
+
 ## Test execution and reporting
 
 `NaukriResumeTest` uses the Login and Profile page objects. `BaseTest` directly creates and closes ChromeDriver; there is no WebDriverFactory. If credentials or the required resume path are missing, the live test is skipped while the config-reader tests still run.

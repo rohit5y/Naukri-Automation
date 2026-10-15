@@ -22,7 +22,7 @@ class AutomationConfigTest {
         assertEquals(config.getProperty("naukri.login.url"), "https://www.naukri.com/nlogin/login");
         assertEquals(config.getProperty("naukri.profile.url"), "https://www.naukri.com/mnjuser/profile");
         assertEquals(config.getProperty("browser"), "chrome");
-        assertEquals(config.getProperty("browser.headless"), "false");
+        assertEquals(config.getProperty("browser.headless"), System.getenv().getOrDefault("BROWSER_HEADLESS", ""));
     }
 
     @Test

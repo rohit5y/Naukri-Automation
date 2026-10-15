@@ -1,6 +1,7 @@
 package com.rohit.naukri.automation.pages;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -49,16 +50,24 @@ public class LoginPage {
     }
 
     private void waitForSignInCompletion() {
+        String signInResult;
         try {
-            new WebDriverWait(driver, VERIFICATION_TIMEOUT).until(currentDriver -> {
+            signInResult = new WebDriverWait(driver, VERIFICATION_TIMEOUT).until(currentDriver -> {
                 String currentUrl = currentDriver.getCurrentUrl().toLowerCase();
                 if (!currentUrl.contains("nlogin") && !currentUrl.contains("/login")) {
-                    return true;
+                    return "completed";
                 }
 
-                String pageText = currentDriver.findElement(By.tagName("body")).getText().toLowerCase();
-                return pageText.contains("invalid") || pageText.contains("incorrect")
-                        || pageText.contains("unable to login");
+                try {
+                    String pageText = currentDriver.findElement(By.tagName("body")).getText().toLowerCase();
+                    if (pageText.contains("invalid") || pageText.contains("incorrect")
+                            || pageText.contains("unable to login")) {
+                        return "invalid";
+                    }
+                } catch (StaleElementReferenceException ignored) {
+                    return null;
+                }
+                return null;
             });
         } catch (TimeoutException exception) {
             throw new TimeoutException(
@@ -66,9 +75,7 @@ public class LoginPage {
                             + "in the browser and retry, or verify the credentials.", exception);
         }
 
-        String pageText = driver.findElement(By.tagName("body")).getText().toLowerCase();
-        if (pageText.contains("invalid") || pageText.contains("incorrect")
-                || pageText.contains("unable to login")) {
+        if (signInResult.equals("invalid")) {
             throw new IllegalStateException(
                     "Naukri did not accept the sign-in attempt. Check the credentials and try again.");
         }

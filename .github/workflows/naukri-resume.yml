@@ -1,0 +1,84 @@
+name: Naukri resume update
+
+on:
+  workflow_dispatch:
+  # Enable only after a permitted manual run succeeds:
+  # schedule:
+  #   - cron: "30 3 * * 1-5"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: naukri-resume-update
+  cancel-in-progress: false
+
+jobs:
+  update-resume:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: maven
+
+      - name: Check Chrome availability
+        run: google-chrome --version
+
+      - name: Run resume automation
+        env:
+          NAUKRI_EMAIL: ${{ secrets.NAUKRI_EMAIL }}
+          NAUKRI_PASSWORD: ${{ secrets.NAUKRI_PASSWORD }}
+          RESUME_B64_1: ${{ secrets.RESUME_B64_1 }}
+          RESUME_B64_2: ${{ secrets.RESUME_B64_2 }}
+          RESUME_B64_3: ${{ secrets.RESUME_B64_3 }}
+          BROWSER_HEADLESS: "true"
+        run: |
+          set -euo pipefail
+
+          if [[ -z "$NAUKRI_EMAIL" || -z "$NAUKRI_PASSWORD" ]]; then
+            echo "::error::Set the NAUKRI_EMAIL and NAUKRI_PASSWORD repository secrets."
+            exit 1
+          fi
+
+          if [[ -z "$RESUME_B64_1" || -z "$RESUME_B64_2" || -z "$RESUME_B64_3" ]]; then
+            echo "::error::Set all three resume chunk secrets: RESUME_B64_1, RESUME_B64_2, and RESUME_B64_3."
+            exit 1
+          fi
+
+          resume="$RUNNER_TEMP/naukri-resume.pdf"
+          trap 'rm -f "$resume"' EXIT
+
+          printf '%s%s%s' "$RESUME_B64_1" "$RESUME_B64_2" "$RESUME_B64_3" \
+            | base64 --decode > "$resume"
+
+          size=$(wc -c < "$resume")
+          if (( size >= 2097152 )); then
+            echo "::error::The resume must be smaller than 2 MiB."
+            exit 1
+          fi
+
+          signature=$(head -c 5 "$resume")
+          if [[ "$signature" != "%PDF-" ]]; then
+            echo "::error::The configured resume chunks do not decode to a PDF file."
+            exit 1
+          fi
+
+          export RESUME_FILE_PATH="$resume"
+          mvn --batch-mode --no-transfer-progress clean test
+
+      - name: Upload JUnit test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: junit-test-results
+          path: target/surefire-reports/*.xml
+          if-no-files-found: warn
+          retention-days: 7

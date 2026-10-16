@@ -82,3 +82,9 @@ jobs:
           path: target/surefire-reports/*.xml
           if-no-files-found: warn
           retention-days: 7
+
+      - name: Upload Extent HTML Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: extent-report
+          path: reports/extent-report.html
